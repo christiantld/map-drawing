@@ -15,8 +15,15 @@
           {{ layer.name }}
         </label>
       </div>
-      <div v-for="(item, index) in areas" :key="index">
-        <p>{{ item }}</p>
+      <div v-for="(item, index) in areas" :key="'id' + index">
+        <p>Area {{ index }}</p>
+        <div v-for="(is, index) in item" :key="'_id' + index">
+          <div v-for="(i, index) in is" :key="'_id_' + index">
+            <p>Latitude: {{ i.lat }}</p>
+            <p>Longitude: {{ i.lng }}</p>
+            <br />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -326,18 +333,22 @@ export default {
 
       const editableLayers = new L.FeatureGroup();
       this.map.addLayer(editableLayers);
+      //const vm = this;
 
-      this.map.on("draw:created", function (e) {
+      this.map.on("draw:created", (e) => {
         const type = e.layerType,
           layer = e.layer;
-        console.log(layer.getLatLngs());
+        const coords = layer.getLatLngs();
+        this.areas = [...this.areas, coords];
+
         if (type === "marker") {
           layer.bindPopup("A popup!");
         }
-
+        this.drawnItems.addLayer(layer);
         editableLayers.addLayer(layer);
       });
     },
+
     initLayers() {
       this.layers.forEach((layer) => {
         const markerFeatures = layer.features.filter(
